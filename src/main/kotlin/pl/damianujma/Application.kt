@@ -15,7 +15,7 @@ fun main() {
         configureSerialization()
         when (dependencies) {
             is Either.Left -> throw Exception()
-            is Either.Right -> configureRouting(dependencies.value)
+            is Either.Right -> configureRouting(dependencies.value.alarmConditionsService)
         }
     }
         .start(wait = true)

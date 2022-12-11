@@ -32,7 +32,7 @@ fun alarmConditionsPersistence() = object : AlarmConditionsPersistence {
             })
         }
             .mapLeft { error ->
-                UnexpectedDomainError("Failed to connect to database", error)
+                UnexpectedDomainError("Failed to connect to insert AlarmConditions", error)
             }
 
     }

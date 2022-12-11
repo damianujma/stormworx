@@ -6,6 +6,7 @@ import pl.damianujma.DomainError
 import pl.damianujma.repo.AlarmConditionsId
 import pl.damianujma.repo.AlarmConditionsPersistence
 
+@kotlinx.serialization.Serializable
 data class CreateCondition(val maxTemp: Double,val city: String)
 
 interface AlarmConditionsService {
