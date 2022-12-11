@@ -1,9 +1,13 @@
 version: "2.0"
 services:
   mariadb:
-    image: mariadb:10.10.2
+    image: mariadb:10.8.2
+    command: --max-connections=300 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
-      MYSQL_ROOT_PASSWORD: admin
-      MYSQL_DATABASE: admin
-      MYSQL_USER: admin
-      MYSQL_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: stormworx
+      MYSQL_ROOT_USER: root
+      MYSQL_USER: stormworx
+      MYSQL_DATABASE: stormworx
+      MYSQL_PASSWORD: stormworx
+    ports:
+      - "3306:3306"

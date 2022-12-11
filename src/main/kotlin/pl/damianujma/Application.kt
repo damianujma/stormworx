@@ -1,24 +1,22 @@
 package pl.damianujma
 
-import io.ktor.server.application.*
+import arrow.core.Either
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import pl.damianujma.env.Env
 import pl.damianujma.env.dependencies
-import pl.damianujma.plugins.*
+import pl.damianujma.plugins.configureRouting
+import pl.damianujma.plugins.configureSerialization
 
-fun main(){
-    println("hello")
+fun main() {
     val env = Env()
     val dependencies = dependencies(env)
     embeddedServer(Netty, port = 8080, host = "0.0.0.0") {
         configureSerialization()
-        configureRouting(dependencies)
+        when (dependencies) {
+            is Either.Left -> throw Exception()
+            is Either.Right -> configureRouting(dependencies.value)
+        }
     }
         .start(wait = true)
-}
-
-
-fun Application.app(): Application.() -> Unit = {
-
 }

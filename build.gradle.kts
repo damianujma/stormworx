@@ -3,6 +3,7 @@ val kotlin_version: String by project
 val logback_version: String by project
 val arrow_version: String by project
 val exposedVersion: String by project
+val mariadb_java_client_version: String by project
 
 plugins {
     application
