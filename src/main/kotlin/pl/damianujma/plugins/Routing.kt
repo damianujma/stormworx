@@ -23,5 +23,11 @@ fun Application.configureRouting(service: AlarmConditionsService) {
                     .mapLeft { errorMsg -> ctx.respond(HttpStatusCode.InternalServerError, errorMsg) }
             }
         }
+
+        get("/alarmConditions/{id}") {
+            service.getCondition(call.parameters["id"]?.toLong()!!)
+                .map { condition -> call.respond(condition) }
+                .mapLeft { call.respond(HttpStatusCode.NotFound)}
+        }
     }
 }
