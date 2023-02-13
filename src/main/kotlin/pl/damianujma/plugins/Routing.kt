@@ -1,33 +1,64 @@
 package pl.damianujma.plugins
 
+import arrow.core.Either
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import io.ktor.util.pipeline.*
+import pl.damianujma.DomainError
+import pl.damianujma.UnexpectedDomainError
 import pl.damianujma.service.AlarmConditionsService
 import pl.damianujma.service.CreateCondition
 
 fun Application.configureRouting(service: AlarmConditionsService) {
 
     routing {
-        get("/hello") {
-            call.respondText("Hello World!")
-        }
-
-        post("/alarmConditions/add") {
+        post("/alarm-conditions/add") {
             val ctx = this.context
             ctx.receive<CreateCondition>().apply {
-                service.createCondition(this)
-                    .map { createCondition ->  ctx.respond(createCondition.serial)}
-                    .mapLeft { errorMsg -> ctx.respond(HttpStatusCode.InternalServerError, errorMsg) }
+                when (val createCondition = service.createCondition(this)) {
+                    is Either.Left -> {
+                        val error = createCondition.value
+                        if (error is UnexpectedDomainError) {
+                            ctx.respond(HttpStatusCode.InternalServerError, error.description)
+                        } else {
+                            ctx.respond(HttpStatusCode.InternalServerError)
+                        }
+                    }
+                    is Either.Right -> ctx.respond(createCondition.value.serial)
+                }
             }
         }
 
-        get("/alarmConditions/{id}") {
-            service.getCondition(call.parameters["id"]?.toLong()!!)
-                .map { condition -> call.respond(condition) }
-                .mapLeft { call.respond(HttpStatusCode.NotFound)}
+        get("/alarm-conditions/{id}") {
+            call.parameters["id"]?.let {
+                when (val condition = service.getCondition(it.toLong())) {
+                    is Either.Left -> handleDomainError(condition)
+                    is Either.Right -> call.respond(condition.value)
+                }
+            } ?: call.respond(HttpStatusCode.NotAcceptable, "Parameter `id` cannot be null")
         }
+
+        get("/alarm-conditions/{id}/predictions") {
+            call.parameters["id"]?.let {
+                when (val condition = service.getMatchingPredictions(it.toLong())) {
+                    is Either.Left -> handleDomainError(condition)
+                    is Either.Right -> call.respond(condition.value)
+                }
+            } ?: call.respond(HttpStatusCode.NotAcceptable, "Parameter `id` cannot be null")
+        }
+    }
+}
+
+private suspend fun PipelineContext<Unit, ApplicationCall>.handleDomainError(
+    condition: Either.Left<DomainError>
+) {
+    val error = condition.value
+    if (error is UnexpectedDomainError) {
+        call.respond(HttpStatusCode.InternalServerError, error.description)
+    } else {
+        call.respond(HttpStatusCode.InternalServerError)
     }
 }

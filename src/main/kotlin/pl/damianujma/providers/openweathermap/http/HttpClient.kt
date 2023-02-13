@@ -8,6 +8,7 @@ import io.ktor.client.request.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import pl.damianujma.DomainError
+import pl.damianujma.UnexpectedDomainError
 import pl.damianujma.providers.openweathermap.http.response.OpenWeatherMapResponse
 
 val client = HttpClient(CIO)
@@ -15,7 +16,16 @@ val appId = ""
 
 val json = Json { ignoreUnknownKeys = true }
 
-suspend fun HttpClient.fetchResponse(city: String, appId: String): Either<DomainError, OpenWeatherMapResponse> {
+suspend fun fetchResponse(
+    city: String,
+    appId: String,
+    httpClient: HttpClient
+): Either<DomainError, OpenWeatherMapResponse> {
+    return Either.catch { httpClient.fetchResponseFromClient(city, appId) }
+        .mapLeft { error -> UnexpectedDomainError("Failed to fetch Openweathermap response", error) }
+}
+
+suspend fun HttpClient.fetchResponseFromClient(city: String, appId: String): OpenWeatherMapResponse {
     val apiRequest = "https://api.openweathermap.org/data/2.5/forecast?q=$city&appid=$appId&units=metric"
     return json.decodeFromString(this.get(apiRequest).body())
 }
