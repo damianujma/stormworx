@@ -7,8 +7,8 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import pl.damianujma.DomainError
-import pl.damianujma.UnexpectedDomainError
+import pl.damianujma.ConnectionError
+import pl.damianujma.UnexpectedOpenWeatherMapConnectionError
 import pl.damianujma.providers.openweathermap.http.response.OpenWeatherMapResponse
 
 val client = HttpClient(CIO)
@@ -20,9 +20,9 @@ suspend fun fetchResponse(
     city: String,
     appId: String,
     httpClient: HttpClient
-): Either<DomainError, OpenWeatherMapResponse> {
+): Either<ConnectionError, OpenWeatherMapResponse> {
     return Either.catch { httpClient.fetchResponseFromClient(city, appId) }
-        .mapLeft { error -> UnexpectedDomainError("Failed to fetch Openweathermap response", error) }
+        .mapLeft { error -> UnexpectedOpenWeatherMapConnectionError("Failed to fetch Openweathermap response", error) }
 }
 
 suspend fun HttpClient.fetchResponseFromClient(city: String, appId: String): OpenWeatherMapResponse {

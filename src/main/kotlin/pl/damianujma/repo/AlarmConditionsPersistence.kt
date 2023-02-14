@@ -7,16 +7,16 @@ import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insertAndGetId
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import pl.damianujma.DomainError
-import pl.damianujma.UnexpectedDomainError
+import pl.damianujma.ConnectionError
+import pl.damianujma.UnexpectedConnectionError
 import pl.damianujma.service.Condition
 
 @JvmInline
 value class AlarmConditionsId(val serial: Long)
 
 interface AlarmConditionsPersistence {
-    suspend fun insert(maxTemp: Double, minTemp: Double, city: String): Either<DomainError, AlarmConditionsId>
-    suspend fun get(id: Long): Either<DomainError, Condition>
+    suspend fun insert(maxTemp: Double, minTemp: Double, city: String): Either<ConnectionError, AlarmConditionsId>
+    suspend fun get(id: Long): Either<ConnectionError, Condition>
 }
 
 fun alarmConditionsPersistence() = object : AlarmConditionsPersistence {
@@ -26,7 +26,7 @@ fun alarmConditionsPersistence() = object : AlarmConditionsPersistence {
         }
     }
 
-    override suspend fun insert(maxTemp: Double, minTemp: Double, city: String): Either<DomainError, AlarmConditionsId> {
+    override suspend fun insert(maxTemp: Double, minTemp: Double, city: String): Either<ConnectionError, AlarmConditionsId> {
         return Either.catch {
             AlarmConditionsId(transaction {
                 AlarmConditions.insertAndGetId { row ->
@@ -37,12 +37,12 @@ fun alarmConditionsPersistence() = object : AlarmConditionsPersistence {
             })
         }
             .mapLeft { error ->
-                UnexpectedDomainError("Failed to insert AlarmConditions", error)
+                UnexpectedConnectionError("Failed to insert AlarmConditions", error)
             }
 
     }
 
-    override suspend fun get(id: Long): Either<DomainError, Condition> {
+    override suspend fun get(id: Long): Either<ConnectionError, Condition> {
         return Either.catch {
             transaction {
                 AlarmConditions.select( AlarmConditions.id eq id ).map {
@@ -52,7 +52,7 @@ fun alarmConditionsPersistence() = object : AlarmConditionsPersistence {
             }
         }
             .mapLeft { error ->
-                UnexpectedDomainError("Failed to get AlarmConditions", error)
+                UnexpectedConnectionError("Failed to get AlarmConditions", error)
             }
 
     }

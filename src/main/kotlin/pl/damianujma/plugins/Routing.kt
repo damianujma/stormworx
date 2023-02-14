@@ -7,8 +7,9 @@ import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.util.pipeline.*
-import pl.damianujma.DomainError
-import pl.damianujma.UnexpectedDomainError
+import pl.damianujma.ConnectionError
+import pl.damianujma.UnexpectedConnectionError
+import pl.damianujma.UnexpectedOpenWeatherMapConnectionError
 import pl.damianujma.service.AlarmConditionsService
 import pl.damianujma.service.CreateCondition
 
@@ -21,10 +22,12 @@ fun Application.configureRouting(service: AlarmConditionsService) {
                 when (val createCondition = service.createCondition(this)) {
                     is Either.Left -> {
                         val error = createCondition.value
-                        if (error is UnexpectedDomainError) {
-                            ctx.respond(HttpStatusCode.InternalServerError, error.description)
+                        if (error is UnexpectedConnectionError) {
+                            call.respond(HttpStatusCode.InternalServerError, error.message)
+                        } else if (error is UnexpectedOpenWeatherMapConnectionError) {
+                            call.respond(HttpStatusCode.InternalServerError, error.message)
                         } else {
-                            ctx.respond(HttpStatusCode.InternalServerError)
+                            call.respond(HttpStatusCode.InternalServerError)
                         }
                     }
                     is Either.Right -> ctx.respond(createCondition.value.serial)
@@ -53,11 +56,13 @@ fun Application.configureRouting(service: AlarmConditionsService) {
 }
 
 private suspend fun PipelineContext<Unit, ApplicationCall>.handleDomainError(
-    condition: Either.Left<DomainError>
+    condition: Either.Left<ConnectionError>
 ) {
     val error = condition.value
-    if (error is UnexpectedDomainError) {
-        call.respond(HttpStatusCode.InternalServerError, error.description)
+    if (error is UnexpectedConnectionError) {
+        call.respond(HttpStatusCode.InternalServerError, error.message)
+    } else if (error is UnexpectedOpenWeatherMapConnectionError) {
+        call.respond(HttpStatusCode.InternalServerError, error.message)
     } else {
         call.respond(HttpStatusCode.InternalServerError)
     }
