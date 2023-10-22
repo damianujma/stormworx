@@ -33,5 +33,7 @@ jobs:
         run: ./gradlew build
       - name: Run App
         run: nohup ./runApp.sh  > build.log 2>&1 < /dev/null &
+      - name: Logs
+        run: cat build.log
       - name: Send notification
         run: ./sendNotification.sh

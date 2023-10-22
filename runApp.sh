@@ -1,2 +1,2 @@
-sleep 60
+sleep 120
 ./gradlew run
