@@ -12,6 +12,8 @@ import pl.damianujma.UnexpectedConnectionError
 import pl.damianujma.UnexpectedOpenWeatherMapConnectionError
 import pl.damianujma.service.AlarmConditionsService
 import pl.damianujma.service.CreateCondition
+import pl.damianujma.service.EmailParameter
+import pl.damianujma.service.main
 
 fun Application.configureRouting(service: AlarmConditionsService) {
 
@@ -51,6 +53,16 @@ fun Application.configureRouting(service: AlarmConditionsService) {
                     is Either.Right -> call.respond(condition.value)
                 }
             } ?: call.respond(HttpStatusCode.NotAcceptable, "Parameter `id` cannot be null")
+        }
+
+        post("/alarm-conditions/sendPredictions") {
+            val ctx = this.context
+            ctx.receive<EmailParameter>().apply {
+                when (val condition = service.getMatchingPredictionsByEmail(this.email)) {
+                    is Either.Left -> handleDomainError(condition)
+                    is Either.Right -> call.respond(main(condition.value.toString(), this.email, "Katowice"))
+                }
+            }
         }
     }
 }

@@ -7,5 +7,6 @@ data class Condition(
     val alarmConditionsId: Long,
     val maxTemp: Double,
     val minTemp: Double,
-    val city: String
+    val city: String,
+    val email: String
 )

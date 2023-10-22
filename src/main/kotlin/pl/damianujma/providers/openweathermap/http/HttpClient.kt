@@ -12,7 +12,7 @@ import pl.damianujma.UnexpectedOpenWeatherMapConnectionError
 import pl.damianujma.providers.openweathermap.http.response.OpenWeatherMapResponse
 
 val client = HttpClient(CIO)
-val appId = ""
+val appId = System.getenv("OPENWEATHER_APP_ID")
 
 val json = Json { ignoreUnknownKeys = true }
 
