@@ -13,6 +13,7 @@ env:
   MARIADB_URL: ${{ secrets.MARIADB_URL }}
   MARIADB_USERNAME: ${{ secrets.MARIADB_USERNAME }}
   MARIADB_PASSWORD: ${{ secrets.MARIADB_PASSWORD }}
+  SECRET_EMAIL: ${{ secrets.SECRET_EMAIL }}
 
 jobs:
   execution:
