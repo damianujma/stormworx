@@ -10,6 +10,9 @@ env:
   STORMWORX_SMTP: ${{ secrets.STORMWORX_SMTP }}
   STORMWORX_SMTP_PORT: ${{ secrets.STORMWORX_SMTP_PORT }}
   OPENWEATHER_APP_ID: ${{ secrets.OPENWEATHER_APP_ID }}
+  MARIADB_URL: ${{ secrets.MARIADB_URL }}
+  MARIADB_USERNAME: ${{ secrets.MARIADB_USERNAME }}
+  MARIADB_PASSWORD: ${{ secrets.MARIADB_PASSWORD }}
 
 jobs:
   execution:
@@ -28,3 +31,7 @@ jobs:
         uses: gradle/gradle-build-action@v2
       - name: Run build with Gradle Wrapper
         run: ./gradlew build
+      - name: Run App
+        run: nohup ./runApp.sh  > build.log 2>&1 < /dev/null &
+      - name: Send notification
+        run: ./sendNotification.sh
