@@ -32,8 +32,9 @@ jobs:
       - name: Run build with Gradle Wrapper
         run: ./gradlew build
       - name: Run App
-        run: ./runApp.sh
-      - name: Logs
-        run: cat build.log
+        run: nohup ./runApp.sh  > build.log 2>&1 < /dev/null &
+      - name: Sleep for 2 minutes
+        run: sleep 120s
+        shell: bash
       - name: Send notification
         run: ./sendNotification.sh
