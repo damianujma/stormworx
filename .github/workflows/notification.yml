@@ -1,6 +1,8 @@
 name: Stormworx notification workflow
 
 on:
+  schedule:
+    - cron: "0 18 * * 1-7"
   workflow_call:
   workflow_dispatch:
 
