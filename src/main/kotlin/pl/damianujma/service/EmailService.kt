@@ -32,7 +32,7 @@ fun main(text: String, emailTo: String, city: String) {
         val mimeMessage = MimeMessage(session)
         mimeMessage.setFrom(InternetAddress(userName))
         mimeMessage.setRecipients(Message.RecipientType.TO, InternetAddress.parse(emailTo, false))
-        mimeMessage.setText(text)
+        mimeMessage.setContent(text, "text/html;  charset=\"utf-8\"")
         mimeMessage.subject = subject
         mimeMessage.sentDate = Date()
 

@@ -14,6 +14,7 @@ import pl.damianujma.service.AlarmConditionsService
 import pl.damianujma.service.CreateCondition
 import pl.damianujma.service.EmailParameter
 import pl.damianujma.service.main
+import pl.damianujma.service.prediction.formatPredictionToHTMLString
 
 fun Application.configureRouting(service: AlarmConditionsService) {
 
@@ -60,7 +61,7 @@ fun Application.configureRouting(service: AlarmConditionsService) {
             ctx.receive<EmailParameter>().apply {
                 when (val condition = service.getMatchingPredictionsByEmail(this.email)) {
                     is Either.Left -> handleDomainError(condition)
-                    is Either.Right -> call.respond(main(condition.value.toString(), this.email, "Katowice"))
+                    is Either.Right -> call.respond(main(formatPredictionToHTMLString(condition.value.second), this.email, condition.value.first))
                 }
             }
         }
